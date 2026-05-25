@@ -1,0 +1,236 @@
+.detalle-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr;
+  gap: 1.5rem;
+  margin-bottom: 6rem; /* espacio para bottom bar */
+  height: calc(100vh - 200px);
+}
+
+@media (max-width: 1024px) {
+  .detalle-grid {
+    grid-template-columns: 1fr;
+    height: auto;
+  }
+}
+
+.detalle-info-panel {
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.data-card {
+  flex: 1;
+}
+
+.section-title h3 {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+
+.data-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.data-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.data-label {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+
+.data-value {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+.data-value.amount {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.operativos-box {
+  background-color: var(--color-secondary);
+  padding: 1rem;
+  border-radius: var(--radius-md);
+}
+
+.sunat-validation-box {
+  padding: 1rem;
+  border-radius: var(--radius-md);
+  border: 1px solid;
+}
+
+.sunat-validation-box.success {
+  background-color: var(--color-success-bg);
+  border-color: #a7f3d0;
+}
+
+.text-success-light {
+  color: #065f46;
+}
+
+.comments-box {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+}
+
+.comments-text {
+  font-size: 0.875rem;
+  font-style: italic;
+  color: var(--color-text-secondary);
+  margin-top: 0.5rem;
+}
+
+/* Viewer Panel */
+.detalle-viewer-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.viewer-card {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  overflow: hidden;
+  background-color: #f1f5f9;
+}
+
+.viewer-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background-color: white;
+  border-bottom: 1px solid var(--color-border);
+  border-radius: 20px;
+  width: fit-content;
+  margin: 1rem auto;
+  box-shadow: var(--shadow-sm);
+}
+
+.toolbar-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  padding: 0.25rem;
+  border-radius: 4px;
+}
+
+.toolbar-btn:hover {
+  background-color: var(--color-secondary);
+  color: var(--color-text-primary);
+}
+
+.zoom-text {
+  font-size: 0.75rem;
+  font-weight: 600;
+  min-width: 40px;
+  text-align: center;
+}
+
+.divider-v {
+  width: 1px;
+  height: 20px;
+  background-color: var(--color-border);
+  margin: 0 0.5rem;
+}
+
+.image-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  overflow: auto;
+}
+
+.mock-receipt {
+  width: 300px;
+  height: 450px;
+  background: linear-gradient(135deg, #439097, #246a73);
+  border-radius: 12px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.mock-receipt::after {
+  content: '';
+  position: absolute;
+  width: 150px;
+  height: 180px;
+  background-color: rgba(255, 255, 255, 0.9);
+  border-radius: 8px;
+  box-shadow: var(--shadow-lg);
+}
+
+.viewer-footer {
+  padding: 1rem;
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* Bottom Bar */
+.bottom-action-bar {
+  position: fixed;
+  bottom: 0;
+  left: 260px; /* Ancho del sidebar */
+  right: 0;
+  height: 80px;
+  background-color: var(--color-surface);
+  border-top: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2rem;
+  z-index: 10;
+}
+
+.btn-observe {
+  color: var(--color-warning-text);
+  border-color: var(--color-warning);
+}
+
+.btn-observe:hover {
+  background-color: var(--color-warning-bg);
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  width: 100%;
+  max-width: 450px;
+  background-color: var(--color-surface);
+  padding: 1.5rem;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-xl);
+}
