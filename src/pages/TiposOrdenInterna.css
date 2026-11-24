@@ -1,0 +1,229 @@
+.tipos-gasto-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.table-card {
+  padding: 1.5rem;
+}
+
+.w-full {
+  width: 100%;
+}
+
+.max-w-md {
+  max-width: 28rem;
+}
+
+/* ── Overlay / Modal ─────────────────────────────────── */
+.tg-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(2px);
+  z-index: 200;
+  animation: tgFadeIn 0.15s ease;
+}
+
+.tg-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 201;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 1rem;
+  width: 100%;
+  max-width: 480px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+  animation: tgSlideUp 0.2s ease;
+  overflow: hidden;
+}
+
+@keyframes tgFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes tgSlideUp {
+  from { opacity: 0; transform: translate(-50%, -46%); }
+  to   { opacity: 1; transform: translate(-50%, -50%); }
+}
+
+.tg-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-secondary);
+}
+
+.tg-modal-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.tg-modal-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  display: flex;
+  align-items: center;
+  padding: 0.25rem;
+  border-radius: 0.375rem;
+  transition: all 0.15s;
+}
+
+.tg-modal-close:hover {
+  background: var(--color-border);
+  color: var(--color-text-primary);
+}
+
+.tg-modal-body {
+  padding: 1.5rem;
+}
+
+/* ── Formulario ──────────────────────────────────────── */
+.tg-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.tg-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.tg-field label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.tg-input {
+  width: 100%;
+  padding: 0.6rem 0.875rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;
+}
+
+.tg-input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(99,102,241,0.12);
+}
+
+.tg-input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.tg-textarea {
+  resize: vertical;
+  min-height: 80px;
+  font-family: inherit;
+}
+
+.tg-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+/* ── Error banner ────────────────────────────────────── */
+.tg-error-msg {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: var(--color-danger-bg, #fef2f2);
+  color: var(--color-danger-text, #dc2626);
+  border: 1px solid var(--color-danger-border, #fca5a5);
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+}
+
+/* ── Vista detalle ───────────────────────────────────── */
+.tg-detalle {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.tg-detalle-row {
+  display: flex;
+  gap: 1rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--color-border);
+  align-items: flex-start;
+}
+
+.tg-detalle-row:last-of-type {
+  border-bottom: none;
+}
+
+.tg-detalle-label {
+  width: 130px;
+  flex-shrink: 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.tg-detalle-value {
+  font-size: 0.9rem;
+  color: var(--color-text-primary);
+  font-weight: 500;
+}
+
+/* ── Toast feedback ──────────────────────────────────── */
+.tg-toast {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  z-index: 300;
+  padding: 0.875rem 1.25rem;
+  border-radius: 0.625rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+  animation: tgSlideRight 0.3s ease;
+}
+
+@keyframes tgSlideRight {
+  from { opacity: 0; transform: translateX(40px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+.tg-toast-success {
+  background: var(--color-success-bg, #f0fdf4);
+  color: var(--color-success-text, #16a34a);
+  border: 1px solid #86efac;
+}
+
+.tg-toast-error {
+  background: var(--color-danger-bg, #fef2f2);
+  color: var(--color-danger-text, #dc2626);
+  border: 1px solid #fca5a5;
+}
+
+/* ── Botón editar con color primary ─────────────────── */
+.action-icon-btn.primary:hover {
+  color: var(--color-primary);
+  background-color: var(--color-secondary);
+}

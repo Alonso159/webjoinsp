@@ -5,11 +5,14 @@ import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
 import { Printer, History, ZoomIn, ZoomOut, RotateCw, ExternalLink, AlertTriangle, Check, Loader } from 'lucide-react';
 import { apiService } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 import './AprobacionDetalle.css';
 
 const AprobacionDetalle = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  
   const [showRechazoModal, setShowRechazoModal] = useState(false);
   const [motivoRechazo, setMotivoRechazo] = useState('');
   const [detalle, setDetalle] = useState(null);
@@ -39,8 +42,73 @@ const AprobacionDetalle = () => {
     if (id) fetchDetalle();
   }, [id]);
 
-  const handlePrint = () => {
-    window.open(`http://localhost:5220/api/Rendiciones/Rendiciones/${id}/Pdf`, '_blank');
+  const handlePrintImage = () => {
+    if (detalle?.imagenComprobante) {
+      const printWindow = window.open('', '_blank');
+      const nombre = detalle.nombreUsuario || 'Usuario Desconocido';
+      const fechaObj = detalle.fecha_Registro ? new Date(detalle.fecha_Registro) : new Date();
+      const fecha = fechaObj.toLocaleDateString('es-PE');
+      const hora = fechaObj.toLocaleTimeString('es-PE');
+      
+      const tipoGasto = detalle.tipoAprobacion ? (detalle.tipoOrdenInterna || 'Orden Interna') : (detalle.tipoGastoNombre || 'Gasto');
+      const area = detalle.departamento || detalle.area || detalle.cCosto || '—';
+
+      printWindow.document.write(`
+        <html>
+          <head>
+            <title>Imprimir Comprobante</title>
+            <style>
+              body { font-family: system-ui, -apple-system, sans-serif; margin: 2rem; color: #333; }
+              .header { text-align: center; margin-bottom: 2rem; border-bottom: 2px solid #eee; padding-bottom: 1rem; }
+              .info-grid { display: flex; justify-content: center; gap: 2rem; margin-bottom: 2rem; font-size: 0.9rem; flex-wrap: wrap; }
+              .info-item { display: flex; flex-direction: column; align-items: center; }
+              .info-label { font-weight: 600; color: #666; text-transform: uppercase; font-size: 0.75rem; margin-bottom: 0.25rem; }
+              .info-value { font-weight: 500; font-size: 1rem; }
+              .image-container { text-align: center; }
+              img { max-width: 100%; max-height: 70vh; object-fit: contain; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
+              @media print {
+                body { margin: 0; padding: 1rem; }
+                img { box-shadow: none; }
+              }
+            </style>
+          </head>
+          <body>
+            <div class="header">
+              <h2 style="margin: 0; color: #111;">Comprobante de Gasto / Orden Interna</h2>
+              <p style="margin: 0.5rem 0 0 0; color: #666;">ID: #${detalle.aprobacionID || detalle.rendicionID || id}</p>
+            </div>
+            <div class="info-grid">
+              <div class="info-item">
+                <span class="info-label">Usuario</span>
+                <span class="info-value">${nombre}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Área</span>
+                <span class="info-value">${area}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Tipo de Gasto</span>
+                <span class="info-value">${tipoGasto}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Fecha de subida</span>
+                <span class="info-value">${fecha}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Hora de subida</span>
+                <span class="info-value">${hora}</span>
+              </div>
+            </div>
+            <div class="image-container">
+              <img src="data:image/jpeg;base64,${detalle.imagenComprobante}" onload="setTimeout(() => { window.print(); window.close(); }, 500);" />
+            </div>
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+    } else {
+      alert('No hay imagen para imprimir');
+    }
   };
 
   const handleValidarSunat = async () => {
@@ -104,7 +172,8 @@ const AprobacionDetalle = () => {
     if (!window.confirm('Esta seguro de aprobar esta rendicion?')) return;
     setSubmitting(true);
     try {
-      await apiService.actualizarEstadoRendicion(id, 'Aprobado', '');
+      const aprobadorId = user?.doi || user?.DOI || user?.id;
+      await apiService.actualizarEstadoRendicion(id, 'Aprobado', '', aprobadorId);
       navigate('/aprobaciones');
     } catch (error) {
       alert('Error al aprobar: ' + (error.response?.data?.msg || error.message));
@@ -120,7 +189,8 @@ const AprobacionDetalle = () => {
     }
     setSubmitting(true);
     try {
-      await apiService.actualizarEstadoRendicion(id, 'Rechazado', motivoRechazo);
+      const aprobadorId = user?.doi || user?.DOI || user?.id;
+      await apiService.actualizarEstadoRendicion(id, 'Rechazado', motivoRechazo, aprobadorId);
       setShowRechazoModal(false);
       navigate('/aprobaciones');
     } catch (error) {
@@ -144,18 +214,14 @@ const AprobacionDetalle = () => {
       <div className="page-header detail-header">
         <div>
           <div className="flex items-center gap-4">
-            <h1 className="page-title">Rendicion #{detalle?.rendicionID || id}</h1>
+            <h1 className="page-title">{detalle?.tipoAprobacion ? 'Orden Interna' : 'Gasto'} #{detalle?.aprobacionID || detalle?.rendicionID || id}</h1>
             {detalle?.estado === 'Aprobado' && <Badge variant="success">Aprobado</Badge>}
             {detalle?.estado === 'Rechazado' && <Badge variant="danger">Rechazado</Badge>}
             {(!detalle?.estado || detalle?.estado === 'Pendiente') && <Badge variant="warning">Pendiente de Aprobacion</Badge>}
           </div>
           <p className="page-subtitle mt-2">
-            Registrado el {detalle?.fecha_Registro ? new Date(detalle.fecha_Registro).toLocaleDateString('es-PE', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}
+            Registrado el {detalle?.fecha_Registro ? new Date(detalle.fecha_Registro).toLocaleDateString('es-PE', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'} a las {detalle?.fecha_Registro ? new Date(detalle.fecha_Registro).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' }) : '—'}
           </p>
-        </div>
-        <div className="header-actions">
-          <Button variant="outline" onClick={handlePrint} icon={<Printer size={16} />}>Imprimir</Button>
-          <Button variant="outline" icon={<History size={16} />}>Historial</Button>
         </div>
       </div>
 
@@ -197,6 +263,18 @@ const AprobacionDetalle = () => {
                   {detalle?.fechaEmision ? new Date(detalle.fechaEmision).toLocaleDateString('es-PE') : '—'}
                 </span>
               </div>
+              <div className="data-item">
+                <span className="data-label">Aprobador</span>
+                <span className="data-value">
+                  {detalle?.aprobadorNombre || "Todavia no Aprobado"}
+                </span>
+              </div>
+              <div className="data-item">
+                <span className="data-label">Fecha Aprobación</span>
+                <span className="data-value">
+                  {detalle?.fechaAprobacion ? new Date(detalle.fechaAprobacion).toLocaleDateString('es-PE') : "Todavia no Aprobado"}
+                </span>
+              </div>
             </div>
 
             <div className="amount-section mt-4 mb-4">
@@ -208,17 +286,30 @@ const AprobacionDetalle = () => {
                 <span className="data-label">Moneda</span>
                 <span className="data-value">{detalle?.moneda || 'PEN'}</span>
               </div>
-              <div className="data-item">
-                <span className="data-label">Tipos de Gasto</span>
-                <span className="data-value amount">{detalle?.tipoGastoNombre ?? '—'}</span>
-              </div>
+              {detalle?.tipoAprobacion ? (
+                <>
+                  <div className="data-item">
+                    <span className="data-label">Tipo Orden Interna</span>
+                    <span className="data-value amount">{detalle?.tipoOrdenInterna ?? '—'}</span>
+                  </div>
+                  <div className="data-item">
+                    <span className="data-label">Placa</span>
+                    <span className="data-value amount">{detalle?.placa ?? '—'}</span>
+                  </div>
+                </>
+              ) : (
+                <div className="data-item">
+                  <span className="data-label">Tipos de Gasto</span>
+                  <span className="data-value amount">{detalle?.tipoGastoNombre ?? '—'}</span>
+                </div>
+              )}
             </div>
 
             <div
               className="sunat-validation-box mt-4"
               style={{
-                borderColor: detalle?.sunatValido ? '#a7f3d0' : '#fecaca',
-                backgroundColor: detalle?.sunatValido ? 'var(--color-success-bg)' : '#fef2f2',
+                borderColor: detalle?.sunatValido ? '#a7f3d0' : (detalle?.sunatMensaje ? '#fecaca' : 'var(--color-border)'),
+                backgroundColor: detalle?.sunatValido ? 'var(--color-success-bg)' : (detalle?.sunatMensaje ? '#fef2f2' : 'var(--color-secondary)'),
                 padding: '1rem',
                 borderRadius: 'var(--radius-md)',
                 border: '1px solid'
@@ -226,8 +317,8 @@ const AprobacionDetalle = () => {
             >
               <div className="flex justify-between items-center w-full">
                 <div>
-                  <div className={`flex gap-2 font-semibold ${detalle?.sunatValido ? 'text-success' : 'text-danger'}`}>
-                    <Check size={18} /> Validacion SUNAT: {detalle?.sunatValido ? 'Valido' : 'No Valido'}
+                  <div className={`flex gap-2 font-semibold ${detalle?.sunatValido ? 'text-success' : (detalle?.sunatMensaje ? 'text-danger' : 'text-secondary')}`}>
+                    <Check size={18} /> Validación SUNAT: {detalle?.sunatValido ? 'Válido' : (detalle?.sunatMensaje ? 'No Válido' : 'No validado')}
                   </div>
                   {detalle?.sunatMensaje && (
                     <div className="text-sm mt-1" style={{ color: 'var(--color-text-secondary)' }}>
@@ -243,7 +334,7 @@ const AprobacionDetalle = () => {
                     disabled={validandoSunat}
                     icon={validandoSunat ? <Loader size={14} className="spin" /> : <RotateCw size={14} />}
                   >
-                    {validandoSunat ? 'Validando...' : 'Re-Validar'}
+                    {validandoSunat ? 'Validando...' : (detalle?.sunatValido || detalle?.sunatMensaje ? 'Re-Validar' : 'Validar SUNAT')}
                   </Button>
                 )}
               </div>
@@ -265,6 +356,7 @@ const AprobacionDetalle = () => {
               <button className="toolbar-btn"><ZoomIn size={18} /></button>
               <div className="divider-v"></div>
               <button className="toolbar-btn"><RotateCw size={18} /></button>
+              <button className="toolbar-btn" onClick={handlePrintImage} title="Imprimir Imagen"><Printer size={18} /></button>
               <button className="toolbar-btn"><ExternalLink size={18} /></button>
             </div>
 

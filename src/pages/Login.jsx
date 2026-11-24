@@ -3,23 +3,25 @@ import { useNavigate } from 'react-router-dom';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
-import { Mail, Lock, ArrowLeft, Building2, Eye, EyeOff } from 'lucide-react';
+import { CreditCard, Lock, ArrowLeft, Building2, Eye, EyeOff } from 'lucide-react';
 import { apiService } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 import './Login.css';
 
 const Login = () => {
   const [isRecovering, setIsRecovering] = useState(false);
-  const [email, setEmail] = useState('');
+  const [dni, setDni] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const response = await apiService.login(email, password);
+      const response = await apiService.login(dni, password);
       if (response.success && response.token) {
-        localStorage.setItem('token', response.token);
+        await login(response.token); // guarda token + carga perfil (rol, departamento)
         navigate('/');
       } else {
         alert(response.message || 'Error al iniciar sesión');
@@ -62,11 +64,12 @@ const Login = () => {
           {!isRecovering ? (
             <form onSubmit={handleLogin} className="login-form">
               <Input 
-                label="Correo electrónico" 
-                type="email" 
-                placeholder="ejemplo@empresa.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                label="DNI" 
+                type="text" 
+                placeholder="Ingrese su DNI"
+                value={dni}
+                onChange={(e) => setDni(e.target.value)}
+                maxLength={8}
                 required
               />
               
@@ -100,11 +103,12 @@ const Login = () => {
           ) : (
             <form onSubmit={handleRecover} className="login-form">
               <Input 
-                label="Correo electrónico" 
-                type="email" 
-                placeholder="ejemplo@empresa.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                label="DNI" 
+                type="text" 
+                placeholder="Ingrese su DNI"
+                value={dni}
+                onChange={(e) => setDni(e.target.value)}
+                maxLength={8}
                 required
               />
               
